@@ -1,0 +1,1186 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minero: 10 Galaxias</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101522;color:#eef3ff;font-family:Arial,sans-serif}
+header{padding:18px;text-align:center;background:#19243a;border-bottom:2px solid #344663}
+h1{margin:0 0 8px;color:#ffd166}
+main{max-width:1100px;margin:auto;padding:16px}
+.panel{background:#1b2940;border:1px solid #344663;border-radius:12px;padding:16px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.stat{background:#111b2d;padding:12px;border-radius:9px;text-align:center}
+.stat strong{display:block;color:#ffd166;font-size:20px;margin-top:5px}
+button{background:#3478d4;color:white;border:0;padding:11px 14px;border-radius:8px;cursor:pointer;font-weight:bold;margin:4px}
+button:hover{filter:brightness(1.15)}
+button:disabled{background:#4b5565;color:#aab3c2;cursor:not-allowed}
+.mine{font-size:22px;padding:22px 35px;background:#d58b32;color:#1b1b1b}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tab.active{background:#e3a52f;color:#171717}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#111b2d;padding:12px;border-radius:9px;margin:8px 0;flex-wrap:wrap}
+.item small{display:block;color:#b8c6dc;margin-top:5px}
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.tech{background:#111b2d;padding:12px;border:1px solid #3b4e6d;border-radius:9px}
+.tech.bought{border-color:#54d68b;background:#16352d}
+.tech.locked{opacity:.45}
+.tech button{width:100%;margin:10px 0 0}
+.muted{color:#aabbd3}
+.notice{color:#ffd166;font-weight:bold}
+.hidden{display:none}
+.detail-box{background:#111b2d;border:1px solid #3b4e6d;border-radius:9px;padding:14px;margin-top:12px}
+.detail-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #344663;flex-wrap:wrap}
+.detail-row:last-child{border-bottom:0}
+.detail-row strong{color:#ffd166}
+.galaxy-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-top:12px}
+.galaxy-card{background:#111b2d;border:1px solid #344663;border-radius:9px;padding:10px;text-align:center}
+.galaxy-card.active{border:2px solid #ffd166}
+.galaxy-card.locked{opacity:.4}
+.galaxy-card button{width:100%;margin:8px 0 0}
+.reset-info{background:#111b2d;border:1px solid #8b5260;border-radius:9px;padding:13px;margin-top:12px}
+.reset-info strong{color:#ff8585}
+#resetCountdown{font-size:20px;color:#ffd166;font-weight:bold}
+.mega-box{background:#30244a;border:2px solid #a77bff;border-radius:12px;padding:16px;margin:12px 0}
+.mega-box h3{color:#d4b5ff;margin-top:0}
+.mega-number{font-size:25px;color:#d4b5ff;font-weight:bold}
+.mega-button{background:#874bd1;font-size:17px;padding:14px 20px}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#19243a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+
+<header>
+  <h1>⛏️ MINERO: 10 GALAXIAS</h1>
+  <div id="galaxyTitle">Galaxia 1</div>
+</header>
+
+<main>
+  <section class="panel stats">
+    <div class="stat">Galaxia<strong id="galaxyNumber">1</strong></div>
+    <div class="stat">Planeta<strong id="planetName">Terra</strong></div>
+    <div class="stat">Moneda<strong id="currencyName">Ferrita</strong></div>
+    <div class="stat">Recursos<strong id="resources">0</strong></div>
+    <div class="stat">Por clic<strong id="clickPower">1</strong></div>
+    <div class="stat">Autominería / segundo<strong id="autoPower">0</strong></div>
+    <div class="stat">Multiplicador<strong id="multiplier">x1</strong></div>
+    <div class="stat">Tecnologías<strong id="techCount">0/10</strong></div>
+  </section>
+
+  <section class="panel">
+    <h2 id="mineTitle">Minar planeta</h2>
+    <p class="muted">Consigue recursos haciendo clic y comprando mejoras.</p>
+    <button class="mine" id="mineButton">⛏️ MINAR</button>
+    <p id="mineInfo"></p>
+  </section>
+
+  <section class="panel">
+    <h2>🌌 Seleccionar galaxia</h2>
+    <p class="muted">Puedes volver a las galaxias que hayas desbloqueado durante este ciclo.</p>
+    <div id="galaxySelector" class="galaxy-list"></div>
+  </section>
+
+  <section class="panel">
+    <div class="tabs">
+      <button class="tab active" id="shopTab">Tienda</button>
+      <button class="tab" id="techTab">Árbol tecnológico</button>
+      <button class="tab" id="travelTab">Viajar / Renacer</button>
+    </div>
+
+    <div id="shopPanel">
+      <h2>🛒 Tienda</h2>
+      <div id="shopItems"></div>
+    </div>
+
+    <div id="techPanel" class="hidden">
+      <h2>🔬 Árbol tecnológico</h2>
+      <p class="muted">Debes comprar las 10 tecnologías para poder avanzar.</p>
+      <div class="tech-grid" id="techItems"></div>
+    </div>
+
+    <div id="travelPanel" class="hidden">
+      <h2>🚀 Viajes y renacimiento</h2>
+      <div id="travelInfo"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>📊 Multiplicadores</h2>
+    <button id="detailButton">▼ Vista más detallada</button>
+    <div id="detailPanel" class="detail-box hidden">
+      <h3>Multiplicador de clic</h3>
+      <div class="detail-row"><span>Mega Renacimiento</span><strong id="detailMegaClick">x1</strong></div>
+      <div class="detail-row"><span>Multiplicador de galaxia</span><strong id="detailGalaxyClick">x1</strong></div>
+      <div class="detail-row"><span>Bonificación tecnológica de clic</span><strong id="detailTechClick">x1</strong></div>
+      <div class="detail-row"><span>Multiplicador total de clic</span><strong id="detailTotalClick">x1</strong></div>
+
+      <h3>Multiplicador de autominería</h3>
+      <div class="detail-row"><span>Mega Renacimiento</span><strong id="detailMegaAuto">x1</strong></div>
+      <div class="detail-row"><span>Multiplicador de galaxia</span><strong id="detailGalaxyAuto">x1</strong></div>
+      <div class="detail-row"><span>Bonificación tecnológica de autominería</span><strong id="detailTechAuto">x1</strong></div>
+      <div class="detail-row"><span>Multiplicador total de autominería</span><strong id="detailTotalAuto">x1</strong></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>✨ Mega Renacimientos</h2>
+    <p>Muestra tu progreso y el multiplicador permanente conseguido con los Mega Renacimientos.</p>
+    <div class="mega-box">
+      <p>Mega Renacimientos realizados: <span class="mega-number" id="megaRebirthCount">0</span></p>
+      <p>Multiplicador permanente: <span class="mega-number" id="megaMultiplier">x1</span></p>
+      <p class="muted" id="nextMegaInfo">Completa las 10 galaxias para desbloquear el Mega Renacimiento.</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>🌠 Progreso</h2>
+    <p id="progressInfo"></p>
+    <p id="multipliersInfo"></p>
+    <p id="costMultiplierInfo"></p>
+    <button id="saveButton">Guardar partida</button>
+    <button id="resetButton">Borrar partida</button>
+
+    <div class="reset-info">
+      <strong>⚠️ Borrado completo de la partida</strong>
+      <p class="muted">
+        Mantén pulsadas simultáneamente ESPACIO + R + RETROCESO
+        durante 10 segundos para borrar todo tu progreso, incluidos los Mega Renacimientos.
+      </p>
+      <p id="resetCountdown">Esperando combinación de teclas...</p>
+    </div>
+
+    <p class="muted" id="saveInfo">El progreso se guarda automáticamente.</p>
+  </section>
+</main>
+
+<script>
+const TOTAL_GALAXIES=10;
+const TOTAL_PLANETS=10;
+const SAVE_KEY="minero_3_galaxias";
+
+/* NOMBRES DE LOS 100 PLANETAS */
+const planetNames=[
+ ["Terra","Marte","Venus","Mercurio","Júpiter","Saturno","Urano","Neptuno","Plutón","Xenos"],
+ ["Aetheria","Kryon","Vortika","Nébula","Drakón","Elyria","Quorix","Zenthra","Obsidia","Nyxara"],
+ ["Astrion","Velkara","Thalass","Orvex","Lumora","Kaelith","Zorath","Mystral","Ecliptor","Abyssia"],
+ ["Pyron","Glacius","Zephyria","Magnor","Solara","Umbra","Kronos","Vexis","Auralis","Draxion"],
+ ["Novaris","Celestia","Ignara","Frostor","Galaxia","Terralis","Voltrix","Eon","Miraxis","Zyphor"],
+ ["Aurelia","Noxis","Helion","Cryptex","Valkor","Etherea","Dravon","Quasar","Lunaris","Oblivion"],
+ ["Arkania","Zerion","Polaris","Nebulor","Astralis","Kaldor","Virelia","Xandor","Omnix","Eternia"],
+ ["Solstice","Vortexus","Abyssor","Luminar","Krythos","Veloria","Orionis","Zenthos","Mythara","Exoria"],
+ ["Draconis","Nivalis","Aetheron","Umbriel","Voltara","Cyrion","Thaloria","Nexaris","Eclipsia","Omnara"],
+ ["Infinity","Genesis","Eternox","Astrava","Chronos","Zenith","Paradox","Omniverse","Primordia","Finalis"]
+];
+
+/* NOMBRES DE LAS 100 MONEDAS */
+const currencyNames=[
+ ["Ferrita","Cobalto","Titanita","Rubidio","Iridita","Paladio","Rodonita","Vanadio","Osmita","Xenonita"],
+ ["Auralio","Krysal","Vortanio","Nebulita","Drakonita","Elyon","Quorita","Zentario","Obsidiano","Nyxium"],
+ ["Astralio","Velkarita","Thalorita","Orvium","Lumerio","Kaelium","Zorita","Mystralio","Ecliptita","Abyssium"],
+ ["Pyral","Glacium","Zephyrita","Magnario","Solenita","Umbralia","Kronium","Vexal","Auralita","Draxita"],
+ ["Novalio","Celestita","Ignarium","Frosteno","Galactita","Terronio","Voltrium","Eonita","Miraxium","Zyphorium"],
+ ["Aurex","Noxium","Helionita","Crysalita","Valken","Etheron","Dravium","Quarzon","Lunarium","Oblivita"],
+ ["Arkanium","Zerita","Polarion","Nebulium","Astronita","Kaldrium","Virexium","Xandorium","Omnion","Eternita"],
+ ["Solarium","Vortexita","Abyssorium","Lumex","Krythonita","Velorium","Orionium","Zenthorium","Mythion","Exorita"],
+ ["Draconium","Nivalita","Aetherium","Umbros","Voltarita","Cyralium","Thalorium","Nexal","Eclipsium","Omnionita"],
+ ["Infinita","Genesium","Eternium","Astralux","Chronita","Zenorium","Paraxium","Omnex","Primorita","Finalium"]
+];
+
+const techNames=[
+ "Pico reforzado","Drones mejorados","Energía minera","Motores eficientes",
+ "Láser avanzado","Naves mineras","Extracción optimizada",
+ "Robots especializados","Tecnología galáctica","Dominio planetario"
+];
+
+const techDescriptions=[
+ "Aumenta la fuerza de cada clic un 25%.",
+ "Aumenta la producción automática un 35%.",
+ "Mejora toda la producción un 25%.",
+ "Mejora toda la producción un 10%.",
+ "Aumenta la fuerza de cada clic un 60%.",
+ "Aumenta la producción automática un 75%.",
+ "Mejora toda la producción un 50%.",
+ "Mejora la autominería un 50%.",
+ "Aumenta toda la producción un 100%.",
+ "Aumenta toda la producción un 200%."
+];
+
+const techEffects=[
+ {type:"click",percent:25},
+ {type:"auto",percent:35},
+ {type:"all",percent:25},
+ {type:"all",percent:10},
+ {type:"click",percent:60},
+ {type:"auto",percent:75},
+ {type:"all",percent:50},
+ {type:"auto",percent:50},
+ {type:"all",percent:100},
+ {type:"all",percent:200}
+];
+
+const $=id=>document.getElementById(id);
+
+function newWorld(){
+ return {
+  pick:0,laser:0,drones:0,ships:0,
+  resources:0,
+  tech:Array(10).fill(false)
+ };
+}
+
+function newGame(){
+ return {
+  rebirths:0,
+  megaRebirths:0,
+  galaxy:1,
+  planet:0,
+  worlds:{},
+  maxPlanets:{1:0},
+  cycleGalaxies:{1:true}
+ };
+}
+
+/* CARGAR PARTIDA */
+function loadGame(){
+ try{
+  const saved=localStorage.getItem(SAVE_KEY);
+  if(!saved) return newGame();
+
+  const loaded=JSON.parse(saved);
+
+  if(!loaded||typeof loaded!=="object"||!loaded.worlds){
+   return newGame();
+  }
+
+  if(loaded.rebirths===undefined) loaded.rebirths=0;
+  if(loaded.megaRebirths===undefined) loaded.megaRebirths=0;
+  if(loaded.galaxy===undefined) loaded.galaxy=1;
+  if(loaded.planet===undefined) loaded.planet=0;
+  if(!loaded.maxPlanets) loaded.maxPlanets={};
+  if(!loaded.cycleGalaxies) loaded.cycleGalaxies={1:true};
+
+  loaded.megaRebirths=Math.max(0,Number(loaded.megaRebirths)||0);
+  loaded.rebirths=Math.max(0,Number(loaded.rebirths)||0);
+  loaded.galaxy=Math.max(1,Math.min(TOTAL_GALAXIES,Number(loaded.galaxy)||1));
+  loaded.planet=Math.max(0,Math.min(9,Number(loaded.planet)||0));
+  loaded.cycleGalaxies[1]=true;
+  loaded.maxPlanets[1]=loaded.maxPlanets[1]??0;
+
+  return loaded;
+ }catch(e){
+  return newGame();
+ }
+}
+
+let game=loadGame();
+
+function worldKey(g,p){
+ return g+"_"+p;
+}
+
+function getWorld(g=game.galaxy,p=game.planet){
+ const key=worldKey(g,p);
+
+ if(!game.worlds[key]){
+  game.worlds[key]=newWorld();
+ }
+
+ const w=game.worlds[key];
+
+ if(w.resources===undefined) w.resources=0;
+ if(w.pick===undefined) w.pick=0;
+ if(w.laser===undefined) w.laser=0;
+ if(w.drones===undefined) w.drones=0;
+ if(w.ships===undefined) w.ships=0;
+ if(!Array.isArray(w.tech)) w.tech=Array(10).fill(false);
+
+ while(w.tech.length<10) w.tech.push(false);
+
+ return w;
+}
+
+function getResources(){
+ return getWorld().resources;
+}
+
+function setResources(value){
+ getWorld().resources=Math.max(0,value);
+}
+
+function fmt(n){
+ if(!Number.isFinite(n)) return "∞";
+
+ const units=[
+  {value:1e18,suffix:"QI"},
+  {value:1e15,suffix:"QA"},
+  {value:1e12,suffix:"T"},
+  {value:1e9,suffix:"B"},
+  {value:1e6,suffix:"M"},
+  {value:1e3,suffix:"K"}
+ ];
+
+ for(const unit of units){
+  if(Math.abs(n)>=unit.value){
+   return Number(n/unit.value).toFixed(2)+unit.suffix;
+  }
+ }
+
+ return Number(n.toFixed(2)).toLocaleString("es-ES");
+}
+
+function fmtMultiplier(n){
+ if(!Number.isFinite(n)) return "∞";
+ return "x"+Number(n.toFixed(2)).toLocaleString("es-ES");
+}
+
+function roundCost(value){
+ if(!Number.isFinite(value)||value<=0) return 0;
+
+ const digits=Math.floor(Math.log10(value))-2;
+
+ if(digits<=0) return Math.floor(value);
+
+ const factor=Math.pow(10,digits);
+ return Math.floor(value/factor)*factor;
+}
+
+function unlockedGalaxies(){
+ return Math.min(TOTAL_GALAXIES,game.rebirths+1);
+}
+
+/* MULTIPLICADOR PERMANENTE DE LOS MEGA RENACIMIENTOS */
+function megaMultiplier(){
+ return Math.pow(2,game.megaRebirths);
+}
+
+/* MULTIPLICADOR TOTAL DE CADA GALAXIA */
+function galaxyMultiplier(g=game.galaxy){
+ if(g>unlockedGalaxies()) return 1;
+
+ const normalMultiplier=Math.pow(2,game.rebirths-(g-1));
+ return megaMultiplier()*normalMultiplier;
+}
+
+function planetCostMultiplier(){
+ return 1+(game.planet*0.2);
+}
+
+function techCount(w=getWorld()){
+ return w.tech.filter(Boolean).length;
+}
+
+function techBonus(w=getWorld()){
+ let click=1;
+ let auto=1;
+
+ w.tech.forEach((bought,i)=>{
+  if(!bought) return;
+
+  const effect=techEffects[i];
+  const multiplier=1+effect.percent/100;
+
+  if(effect.type==="click"||effect.type==="all") click*=multiplier;
+  if(effect.type==="auto"||effect.type==="all") auto*=multiplier;
+ });
+
+ return {click,auto};
+}
+
+function clickMultiplier(){
+ return galaxyMultiplier()*techBonus().click;
+}
+
+function autoMultiplier(){
+ return galaxyMultiplier()*techBonus().auto;
+}
+
+function clickPower(){
+ const w=getWorld();
+ return Math.max(1,(1+w.pick*2+w.laser*10)*clickMultiplier());
+}
+
+function autoPower(){
+ const w=getWorld();
+ return (w.drones*3+w.ships*22)*autoMultiplier();
+}
+
+function shopCost(type){
+ const w=getWorld();
+ const scale=planetCostMultiplier();
+
+ const costs={
+  pick:25*Math.pow(1.6,w.pick)*scale,
+  laser:150*Math.pow(1.75,w.laser)*scale,
+  drones:100*Math.pow(1.55,w.drones)*scale,
+  ships:700*Math.pow(1.65,w.ships)*scale
+ };
+
+ return roundCost(costs[type]);
+}
+
+function techCost(index){
+ return roundCost(100*Math.pow(2.15,index)*planetCostMultiplier());
+}
+
+function travelCost(){
+ return roundCost(techCost(9)*1.5);
+}
+
+function rebirthCost(){
+ return roundCost(travelCost()*5);
+}
+
+function canBuyTech(i){
+ const w=getWorld();
+
+ if(w.tech[i]) return false;
+ if(i===0) return true;
+
+ return w.tech[i-1];
+}
+
+function buyTech(i){
+ const w=getWorld();
+ const cost=techCost(i);
+
+ if(!canBuyTech(i)){
+  alert("Primero debes comprar la tecnología anterior.");
+  return;
+ }
+
+ if(getResources()<cost){
+  alert("No tienes suficientes recursos.");
+  return;
+ }
+
+ setResources(getResources()-cost);
+ w.tech[i]=true;
+
+ update();
+ save();
+}
+
+function buyUpgrade(type){
+ const w=getWorld();
+ const cost=shopCost(type);
+
+ if(getResources()<cost){
+  alert("No tienes suficientes recursos.");
+  return;
+ }
+
+ setResources(getResources()-cost);
+ w[type]++;
+
+ update();
+ save();
+}
+
+function mine(){
+ setResources(getResources()+clickPower());
+ update();
+ save();
+}
+
+function canTravel(){
+ return techCount()===10;
+}
+
+function travel(){
+ const maxPlanet=game.maxPlanets[game.galaxy]??0;
+
+ if(game.planet===9){
+  alert("Has llegado al último planeta de esta galaxia. Mira la pestaña Viajar / Renacer.");
+  return;
+ }
+
+ if(game.planet<maxPlanet){
+  game.planet++;
+  getWorld();
+  update();
+  save();
+  return;
+ }
+
+ if(!canTravel()){
+  alert("Necesitas comprar las 10 tecnologías de este planeta.");
+  return;
+ }
+
+ const cost=travelCost();
+
+ if(getResources()<cost){
+  alert("Necesitas "+fmt(cost)+" recursos para viajar.");
+  return;
+ }
+
+ setResources(getResources()-cost);
+ game.planet++;
+ game.maxPlanets[game.galaxy]=game.planet;
+
+ getWorld();
+ update();
+ save();
+}
+
+function previousPlanet(){
+ if(game.planet<=0) return;
+
+ game.planet--;
+ getWorld();
+
+ update();
+ save();
+}
+
+function selectGalaxy(g){
+ if(g<1||g>unlockedGalaxies()) return;
+
+ if(!game.cycleGalaxies[g]){
+  alert("Primero debes completar la galaxia anterior y pagar para entrar aquí.");
+  return;
+ }
+
+ game.galaxy=g;
+ game.planet=0;
+
+ getWorld();
+ update();
+ save();
+}
+
+function travelGalaxy(){
+ const current=game.galaxy;
+ const next=current+1;
+
+ if(game.planet!==9){
+  alert("Debes llegar al planeta 10.");
+  return;
+ }
+
+ if(next>unlockedGalaxies()){
+  alert("Esa galaxia todavía no está desbloqueada. Necesitas un renacimiento.");
+  return;
+ }
+
+ if(!canTravel()){
+  alert("Necesitas comprar las 10 tecnologías del planeta 10.");
+  return;
+ }
+
+ if(game.cycleGalaxies[next]){
+  alert("Ya has desbloqueado esta galaxia durante este ciclo.");
+  return;
+ }
+
+ const cost=travelCost();
+
+ if(getResources()<cost){
+  alert("Necesitas "+fmt(cost)+" recursos para entrar en la siguiente galaxia.");
+  return;
+ }
+
+ if(!confirm(
+  "¿Pagar "+fmt(cost)+" "+currencyNames[current-1][9]+
+  " para entrar en la Galaxia "+next+
+  "?\n\nLlegarás al planeta 1 y el multiplicador de costes volverá a x1."
+  )){
+  return;
+ }
+
+ setResources(getResources()-cost);
+ game.cycleGalaxies[next]=true;
+ game.maxPlanets[next]=0;
+ game.galaxy=next;
+ game.planet=0;
+
+ getWorld();
+ update();
+ save();
+}
+
+function rebirth(){
+ const lastUnlocked=unlockedGalaxies();
+
+ if(game.galaxy!==lastUnlocked){
+  alert("Debes estar en la última galaxia desbloqueada para renacer.");
+  return;
+ }
+
+ if(game.planet!==9){
+  alert("El renacimiento solo se puede realizar en el planeta 10.");
+  return;
+ }
+
+ if(!canTravel()){
+  alert("Necesitas comprar las 10 tecnologías del planeta 10.");
+  return;
+ }
+
+ if(game.rebirths>=TOTAL_GALAXIES-1){
+  alert("Ya has desbloqueado todas las galaxias.");
+  return;
+ }
+
+ const cost=rebirthCost();
+
+ if(getResources()<cost){
+  alert("Necesitas "+fmt(cost)+" recursos para renacer.");
+  return;
+ }
+
+ const nextGalaxy=game.rebirths+2;
+
+ if(!confirm(
+  "¿Realizar el renacimiento número "+(game.rebirths+1)+
+  "?\n\nDesbloquearás permanentemente la Galaxia "+nextGalaxy+
+  " y volverás a Terra.\n\n"+
+  "PERDERÁS TODOS LOS RECURSOS, MEJORAS, TECNOLOGÍAS Y PROGRESO DEL CICLO."
+  )){
+  return;
+ }
+
+ game.rebirths++;
+ game.worlds={};
+ game.maxPlanets={1:0};
+ game.cycleGalaxies={1:true};
+ game.galaxy=1;
+ game.planet=0;
+
+ getWorld();
+ update();
+ save();
+}
+
+/* MEGA RENACIMIENTO */
+function megaRebirth(){
+ if(game.galaxy!==10||game.planet!==9){
+  alert("Debes llegar a la Galaxia 10, planeta 10.");
+  return;
+ }
+
+ if(game.rebirths!==9){
+  alert("Debes haber desbloqueado las 10 galaxias.");
+  return;
+ }
+
+ if(!canTravel()){
+  alert("Necesitas comprar las 10 tecnologías del planeta 10.");
+  return;
+ }
+
+ const nextMega=game.megaRebirths+1;
+ const nextMultiplier=Math.pow(2,nextMega);
+
+ const message=
+  "¿REALIZAR EL MEGA RENACIMIENTO "+nextMega+"?\n\n"+
+  "Conseguirás un multiplicador permanente de "+fmtMultiplier(nextMultiplier)+" para TODAS las galaxias.\n\n"+
+  "PERDERÁS ABSOLUTAMENTE TODO:\n"+
+  "• Todos los recursos.\n"+
+  "• Todas las mejoras.\n"+
+  "• Todas las tecnologías.\n"+
+  "• Todos los planetas alcanzados.\n"+
+  "• Todos los renacimientos normales.\n"+
+  "• Todas las galaxias desbloqueadas permanentemente.\n\n"+
+  "Volverás a Terra, Galaxia 1, planeta 1.\n"+
+  "Tu multiplicador de Mega Renacimiento se conservará y aumentará.";
+
+ if(!confirm(message)) return;
+
+ // Aumentar el contador permanente de Mega Renacimientos
+ game.megaRebirths++;
+
+ // Borrar todo el progreso normal
+ game.rebirths=0;
+ game.worlds={};
+ game.maxPlanets={1:0};
+ game.cycleGalaxies={1:true};
+ game.galaxy=1;
+ game.planet=0;
+
+ getWorld();
+ update();
+ save();
+
+ alert(
+  "¡MEGA RENACIMIENTO COMPLETADO!\n\n"+
+  "Mega Renacimientos: "+game.megaRebirths+
+  "\nMultiplicador permanente: "+fmtMultiplier(megaMultiplier())+
+  "\n\n¡Toda tu producción recibe este multiplicador!"
+ );
+}
+
+function getUpgradeInfo(type,w){
+ const clickMulti=clickMultiplier();
+ const autoMulti=autoMultiplier();
+
+ const info={
+  pick:{
+   name:"⛏️ Pico",
+   description:"Mejora la fuerza de tus clics.",
+   current:w.pick*2*clickMulti,
+   next:2*clickMulti,
+   unit:"recursos por clic"
+  },
+  laser:{
+   name:"🔦 Láser",
+   description:"Gran mejora para la minería manual.",
+   current:w.laser*10*clickMulti,
+   next:10*clickMulti,
+   unit:"recursos por clic"
+  },
+  drones:{
+   name:"🤖 Drones",
+   description:"Extraen recursos automáticamente.",
+   current:w.drones*3*autoMulti,
+   next:3*autoMulti,
+   unit:"recursos por segundo"
+  },
+  ships:{
+   name:"🚀 Naves mineras",
+   description:"Autominería mucho más potente.",
+   current:w.ships*22*autoMulti,
+   next:22*autoMulti,
+   unit:"recursos por segundo"
+  }
+ };
+
+ return info[type];
+}
+
+function renderShop(){
+ const w=getWorld();
+ const types=["pick","laser","drones","ships"];
+ const currency=currencyNames[game.galaxy-1][game.planet];
+
+ $("shopItems").innerHTML=types.map(type=>{
+  const info=getUpgradeInfo(type,w);
+  const cost=shopCost(type);
+
+  return `<div class="item">
+   <div>
+    <strong>${info.name} · Nivel ${w[type]}</strong>
+    <small>${info.description}</small>
+    <small>Ganancia por nivel: +${fmt(info.next)} ${info.unit}</small>
+    <small>Ganancia acumulada: ${fmt(info.current)} ${info.unit}</small>
+    <small>Coste: ${fmt(cost)} ${currency}</small>
+   </div>
+   <button ${getResources()<cost?"disabled":""} onclick="buyUpgrade('${type}')">Comprar</button>
+  </div>`;
+ }).join("");
+}
+
+function renderTech(){
+ const w=getWorld();
+ const currency=currencyNames[game.galaxy-1][game.planet];
+
+ $("techItems").innerHTML=techNames.map((name,i)=>{
+  const bought=w.tech[i];
+  const unlocked=canBuyTech(i);
+  const cost=techCost(i);
+
+  return `<div class="tech ${bought?"bought":""} ${!bought&&!unlocked?"locked":""}">
+   <strong>${i+1}. ${name}</strong>
+   <p class="muted">${techDescriptions[i]}</p>
+   <small>${bought?"✅ Comprada":"Coste: "+fmt(cost)+" "+currency}</small>
+   <button ${bought||!unlocked||getResources()<cost?"disabled":""} onclick="buyTech(${i})">
+    ${bought?"Comprada":unlocked?"Investigar":"Bloqueada"}
+   </button>
+  </div>`;
+ }).join("");
+}
+
+function renderTravel(){
+ const count=techCount();
+ const cost=travelCost();
+ const ready=count===10;
+ const currency=currencyNames[game.galaxy-1][game.planet];
+ const maxPlanet=game.maxPlanets[game.galaxy]??0;
+ let previousButton="";
+
+ if(game.planet>0){
+  previousButton=`<button onclick="previousPlanet()">⬅️ Volver al planeta anterior</button>`;
+ }
+
+ if(game.planet<9){
+  const nextPlanet=game.planet+1;
+  const alreadyUnlocked=game.planet<maxPlanet;
+
+  if(alreadyUnlocked){
+   $("travelInfo").innerHTML=`
+    <h3>🚀 Volver a ${planetNames[game.galaxy-1][nextPlanet]}</h3>
+    <p>Este planeta ya fue desbloqueado anteriormente.</p>
+    <p>El viaje es gratuito.</p>
+    ${previousButton}
+    <button onclick="travel()">🚀 Viajar gratis al siguiente planeta</button>`;
+   return;
+  }
+
+  $("travelInfo").innerHTML=`
+   <h3>Viajar al planeta ${nextPlanet+1}: ${planetNames[game.galaxy-1][nextPlanet]}</h3>
+   <p>Tecnologías compradas: <strong>${count}/10</strong></p>
+   <p>Coste del viaje: <strong>${fmt(cost)} ${currency}</strong></p>
+   <p>Multiplicador de coste: <strong>${fmtMultiplier(planetCostMultiplier())}</strong></p>
+   <p class="muted">Debes comprar las 10 tecnologías para avanzar.</p>
+   ${previousButton}
+   <button onclick="travel()" ${!ready||getResources()<cost?"disabled":""}>🚀 Viajar al siguiente planeta</button>
+   ${!ready?'<p class="notice">Te faltan tecnologías por comprar.</p>':""}`;
+  return;
+ }
+
+ /* GALAXIA 10: MEGA RENACIMIENTO */
+ if(game.galaxy===10){
+  const nextMega=game.megaRebirths+1;
+  const nextMultiplier=Math.pow(2,nextMega);
+
+  $("travelInfo").innerHTML=`
+   <div class="mega-box">
+    <h3>🌌✨ ¡MEGA RENACIMIENTO DISPONIBLE!</h3>
+    <p>Has completado la Galaxia 10 y llegado al planeta 10.</p>
+    <p>Tecnologías compradas: <strong>${count}/10</strong></p>
+    <p>Mega Renacimientos realizados: <strong>${game.megaRebirths}</strong></p>
+    <p>Multiplicador actual: <span class="mega-number">${fmtMultiplier(megaMultiplier())}</span></p>
+    <p>Multiplicador después del Mega Renacimiento: <span class="mega-number">${fmtMultiplier(nextMultiplier)}</span></p>
+    <p class="muted">El Mega Renacimiento borra todo tu progreso normal, incluidos los renacimientos y las galaxias desbloqueadas. Conservarás únicamente el contador de Mega Renacimientos y su multiplicador.</p>
+    <button class="mega-button" onclick="megaRebirth()" ${!ready?"disabled":""}>✨ REALIZAR MEGA RENACIMIENTO</button>
+    ${!ready?'<p class="notice">Debes comprar las 10 tecnologías del planeta 10.</p>':""}
+   </div>
+   ${previousButton}`;
+  return;
+ }
+
+ const nextGalaxy=game.galaxy+1;
+ const hasNextUnlocked=nextGalaxy<=unlockedGalaxies();
+
+ if(hasNextUnlocked){
+  const alreadyPaid=!!game.cycleGalaxies[nextGalaxy];
+
+  $("travelInfo").innerHTML=`
+   <h3>🌌 Galaxia ${game.galaxy} · Planeta 10</h3>
+   <p>Has llegado a ${planetNames[game.galaxy-1][9]}.</p>
+   <p>Tecnologías compradas: <strong>${count}/10</strong></p>
+   <p>Coste para entrar en Galaxia ${nextGalaxy}: <strong>${fmt(cost)} ${currency}</strong></p>
+   <p>Multiplicador de coste en este planeta: <strong>${fmtMultiplier(planetCostMultiplier())}</strong></p>
+   <p class="notice">Al entrar en la nueva galaxia empezarás en el planeta 1 con el coste x1.</p>
+   ${alreadyPaid?
+    '<p>Ya pagaste para desbloquear la siguiente galaxia en este ciclo.</p>':
+    `<button onclick="travelGalaxy()" ${!ready||getResources()<cost?"disabled":""}>🚀 Pagar y entrar en Galaxia ${nextGalaxy}</button>`}
+   ${!ready?'<p class="notice">Debes comprar las 10 tecnologías del planeta 10.</p>':""}
+   ${previousButton}`;
+  return;
+ }
+
+ const price=rebirthCost();
+
+ $("travelInfo").innerHTML=`
+  <h3>✨ Renacimiento disponible</h3>
+  <p>Has completado la Galaxia ${game.galaxy}, planeta 10.</p>
+  <p>Tecnologías compradas: <strong>${count}/10</strong></p>
+  <p>Coste del renacimiento: <strong>${fmt(price)} ${currency}</strong></p>
+  <p class="notice">Desbloquearás permanentemente la Galaxia ${nextGalaxy}.</p>
+  <p>Después volverás a Terra, Galaxia 1, planeta 1. Tendrás que volver a pagar las puertas de todas las galaxias en el siguiente ciclo.</p>
+  <button onclick="rebirth()" ${!ready||getResources()<price?"disabled":""}>✨ Renacer y desbloquear Galaxia ${nextGalaxy}</button>
+  ${!ready?'<p class="notice">Debes comprar las 10 tecnologías del planeta 10.</p>':""}
+  ${previousButton}`;
+}
+
+function renderGalaxySelector(){
+ const unlocked=unlockedGalaxies();
+
+ $("galaxySelector").innerHTML=Array.from({length:TOTAL_GALAXIES},(_,i)=>{
+  const g=i+1;
+  const permanentlyUnlocked=g<=unlocked;
+  const available=!!game.cycleGalaxies[g];
+  const active=g===game.galaxy;
+  const multiplier=galaxyMultiplier(g);
+
+  return `<div class="galaxy-card ${active?"active":""} ${!available?"locked":""}">
+   <strong>🌌 Galaxia ${g}</strong>
+   <p>${permanentlyUnlocked?fmtMultiplier(multiplier):"Bloqueada"}</p>
+   ${available?
+    `<button ${active?"disabled":""} onclick="selectGalaxy(${g})">${active?"Estás aquí":"Entrar"}</button>`:
+    `<small>${permanentlyUnlocked?"Desbloqueada permanentemente. Debes pagar para entrar en este ciclo.":"Requiere renacimiento"}</small>`}
+  </div>`;
+ }).join("");
+}
+
+function updateDetails(){
+ const galaxy=galaxyMultiplier();
+ const mega=megaMultiplier();
+ const bonus=techBonus();
+
+ $("detailMegaClick").textContent=fmtMultiplier(mega);
+ $("detailGalaxyClick").textContent=fmtMultiplier(galaxy/mega);
+ $("detailTechClick").textContent=fmtMultiplier(bonus.click);
+ $("detailTotalClick").textContent=fmtMultiplier(galaxy*bonus.click);
+
+ $("detailMegaAuto").textContent=fmtMultiplier(mega);
+ $("detailGalaxyAuto").textContent=fmtMultiplier(galaxy/mega);
+ $("detailTechAuto").textContent=fmtMultiplier(bonus.auto);
+ $("detailTotalAuto").textContent=fmtMultiplier(galaxy*bonus.auto);
+}
+
+function updateMegaInfo(){
+ $("megaRebirthCount").textContent=game.megaRebirths;
+ $("megaMultiplier").textContent=fmtMultiplier(megaMultiplier());
+
+ if(game.megaRebirths===0){
+  $("nextMegaInfo").textContent=
+   "Completa las 10 galaxias para conseguir tu primer Mega Renacimiento y multiplicar toda tu producción por x2.";
+ }else{
+  $("nextMegaInfo").textContent=
+   "Tu siguiente Mega Renacimiento aumentará el multiplicador de "+
+   fmtMultiplier(megaMultiplier())+" a "+
+   fmtMultiplier(megaMultiplier()*2)+".";
+ }
+}
+
+function update(){
+ const mult=galaxyMultiplier();
+ const resources=getResources();
+ const currency=currencyNames[game.galaxy-1][game.planet];
+ const planet=planetNames[game.galaxy-1][game.planet];
+
+ $("galaxyTitle").textContent="🌌 Galaxia "+game.galaxy+" · Producción "+fmtMultiplier(mult);
+ $("galaxyNumber").textContent=game.galaxy;
+ $("planetName").textContent=planet;
+ $("currencyName").textContent=currency;
+ $("resources").textContent=fmt(resources);
+ $("clickPower").textContent=fmt(clickPower());
+ $("autoPower").textContent=fmt(autoPower());
+ $("multiplier").textContent=fmtMultiplier(clickMultiplier());
+ $("techCount").textContent=techCount()+"/10";
+
+ $("mineInfo").textContent="Cada clic consigue "+fmt(clickPower())+" "+currency+".";
+
+ $("progressInfo").textContent=
+  "Galaxia "+game.galaxy+" de 10 · Planeta "+(game.planet+1)+
+  " de 10 · Renacimientos normales: "+game.rebirths+
+  " · Mega Renacimientos: "+game.megaRebirths+
+  " · Galaxias desbloqueadas permanentemente: "+unlockedGalaxies()+"/10"+
+  " · Galaxias alcanzadas en este ciclo: "+Object.keys(game.cycleGalaxies).length;
+
+ let multiplierText="Multiplicadores: ";
+
+ for(let g=1;g<=unlockedGalaxies();g++){
+  multiplierText+="Galaxia "+g+" "+fmtMultiplier(galaxyMultiplier(g));
+  if(g<unlockedGalaxies()) multiplierText+=" · ";
+ }
+
+ $("multipliersInfo").textContent=multiplierText;
+
+ $("costMultiplierInfo").textContent=
+  "Coste de este planeta: "+fmtMultiplier(planetCostMultiplier())+
+  " · Aumento fijo del 20% por planeta. Se reinicia en x1 al entrar en cada galaxia.";
+
+ $("mineTitle").textContent="Minar "+planet;
+
+ updateDetails();
+ updateMegaInfo();
+ renderShop();
+ renderTech();
+ renderTravel();
+ renderGalaxySelector();
+}
+
+/* GUARDADO */
+function save(){
+ try{
+  localStorage.setItem(SAVE_KEY,JSON.stringify(game));
+  $("saveInfo").textContent="Partida guardada correctamente.";
+ }catch(e){
+  $("saveInfo").textContent="No se pudo guardar la partida en este navegador.";
+ }
+}
+
+function showTab(tab){
+ ["shop","tech","travel"].forEach(t=>{
+  $(t+"Panel").classList.toggle("hidden",t!==tab);
+  $(t+"Tab").classList.toggle("active",t===tab);
+ });
+}
+
+$("mineButton").addEventListener("click",mine);
+// Enter no activa el botón de minar; la minería manual es solo con clic/tap.
+$("mineButton").addEventListener("keydown",event=>{
+  if(event.key==="Enter") event.preventDefault();
+});
+window.addEventListener("keydown",event=>{
+  if(event.key==="Enter" && document.activeElement===$("mineButton")) event.preventDefault();
+});
+$("shopTab").addEventListener("click",()=>showTab("shop"));
+$("techTab").addEventListener("click",()=>showTab("tech"));
+$("travelTab").addEventListener("click",()=>showTab("travel"));
+
+$("detailButton").addEventListener("click",()=>{
+ const panel=$("detailPanel");
+ const hidden=panel.classList.toggle("hidden");
+ $("detailButton").textContent=hidden?"▼ Vista más detallada":"▲ Ocultar vista detallada";
+});
+
+$("saveButton").addEventListener("click",save);
+
+/* BOTÓN INFORMATIVO: NO BORRA LA PARTIDA */
+$("resetButton").addEventListener("click",()=>{
+ alert("Para borrar tu progreso debes mantener pulsadas ESPACIO + R + RETROCESO durante 10 segundos.");
+});
+
+/* SISTEMA DE BORRADO PROTEGIDO */
+const requiredKeys=["Space","KeyR","Backspace"];
+const pressedKeys=new Set();
+
+let resetHoldStart=null;
+let resetCompleted=false;
+
+function resetProgress(){
+ if(resetCompleted) return;
+
+ resetCompleted=true;
+ pressedKeys.clear();
+ resetHoldStart=null;
+
+ try{
+  localStorage.removeItem(SAVE_KEY);
+
+  if(localStorage.getItem(SAVE_KEY)!==null){
+   throw new Error("No se pudo eliminar la partida anterior.");
+  }
+
+  // Borrar también los Mega Renacimientos al eliminar toda la partida
+  game=newGame();
+  getWorld();
+
+  localStorage.setItem(SAVE_KEY,JSON.stringify(game));
+
+  const verification=JSON.parse(localStorage.getItem(SAVE_KEY));
+
+  if(!verification || verification.rebirths!==0 ||
+     verification.megaRebirths!==0 ||
+     verification.galaxy!==1 || verification.planet!==0){
+   throw new Error("No se pudo verificar la nueva partida.");
+  }
+
+  update();
+
+  $("resetCountdown").textContent="¡Partida borrada! Has vuelto a Terra.";
+  $("saveInfo").textContent="Nueva partida guardada correctamente.";
+
+  alert("¡Progreso borrado! Empiezas desde cero en Terra.");
+
+ }catch(error){
+  $("resetCountdown").textContent="Error al borrar o guardar la partida.";
+  $("saveInfo").textContent="El navegador no permitió modificar el almacenamiento.";
+  console.error(error);
+ }
+}
+
+function updateResetCountdown(){
+ if(resetCompleted) return;
+
+ const allPressed=requiredKeys.every(key=>pressedKeys.has(key));
+
+ if(!allPressed){
+  resetHoldStart=null;
+  $("resetCountdown").textContent="Esperando combinación de teclas...";
+  return;
+ }
+
+ if(resetHoldStart===null){
+  resetHoldStart=Date.now();
+ }
+
+ const elapsed=(Date.now()-resetHoldStart)/1000;
+ const remaining=Math.max(0,10-elapsed);
+
+ $("resetCountdown").textContent=
+  "Manteniendo teclas: "+remaining.toFixed(1)+" segundos";
+
+ if(elapsed>=10){
+  resetProgress();
+ }
+}
+
+window.addEventListener("keydown",event=>{
+ if(!requiredKeys.includes(event.code)) return;
+
+ event.preventDefault();
+
+ if(event.repeat) return;
+ if(resetCompleted) return;
+
+ pressedKeys.add(event.code);
+ updateResetCountdown();
+});
+
+window.addEventListener("keyup",event=>{
+ if(!requiredKeys.includes(event.code)) return;
+
+ pressedKeys.delete(event.code);
+ resetHoldStart=null;
+
+ if(!resetCompleted){
+  $("resetCountdown").textContent=
+   "Tecla soltada. El contador ha vuelto a cero.";
+ }
+});
+
+window.addEventListener("blur",()=>{
+ pressedKeys.clear();
+ resetHoldStart=null;
+
+ if(!resetCompleted){
+  $("resetCountdown").textContent="Combinación cancelada.";
+ }
+});
+
+/* INICIO DEL JUEGO */
+getWorld();
+update();
+
+if(localStorage.getItem(SAVE_KEY)===null){
+ save();
+}
+
+/* PRODUCCIÓN AUTOMÁTICA Y GUARDADO */
+setInterval(()=>{
+ const production=autoPower();
+
+ if(production>0){
+  setResources(getResources()+production);
+  update();
+ }
+
+ save();
+},1000);
+
+/* ACTUALIZAR EL CONTADOR DE BORRADO */
+setInterval(updateResetCountdown,100);
+</script>
+<script>
+// Web instalable y actualizaciones automáticas cuando haya conexión.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    location.reload();
+  });
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('./sw.js');
+      // Buscar actualizaciones al entrar y periódicamente mientras hay conexión.
+      const check = () => { if (navigator.onLine) registration.update().catch(()=>{}); };
+      check();
+      setInterval(check, 5 * 60 * 1000);
+      window.addEventListener('online', check);
+    } catch (err) { console.warn('No se pudo registrar el modo offline:', err); }
+  });
+}
+</script>
+</body>
+</html>
